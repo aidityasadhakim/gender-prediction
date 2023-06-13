@@ -41,8 +41,8 @@ def print():
 
 @app.get("/api/v1/predict")
 # A function to do it
-def genderpredictor(a):
-    test_name = [a]
+def genderpredictor(name):
+    test_name = [name]
     vector = cv.transform(test_name).toarray()
     if clf.predict(vector) == 0:
         return {
