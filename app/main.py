@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction import DictVectorizer
@@ -10,6 +11,10 @@ from fastapi import FastAPI
 from pymongo import MongoClient
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 
+client = MongoClient(os.getenv('MONGO_SRC'))
+gender_data = client.gender_prediction.gender_data
+data = gender_data.find_one()
+print(data)
 PATH = 'https://raw.githubusercontent.com/Jcharis/Python-Machine-Learning/master/Gender%20Classification%20With%20%20Machine%20Learning/names_dataset.csv'
 df = pd.read_csv(PATH)
 
