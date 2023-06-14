@@ -16,15 +16,17 @@ from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from pydantic import BaseModel
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 from pymongo.server_api import ServerApi
 
 class Person(BaseModel):
     name: str
-    gender: str
+    sex: str
 
 # Initializing mongodb client
 client = MongoClient(os.getenv('MONGO_SRC'), server_api=ServerApi('1'))
 gender_data = client.gender_prediction.gender_data
+counter_db = client.gender_prediction.counter
 
 # Initializing naive bayes and count vectorizer
 clf = MultinomialNB()
@@ -47,12 +49,15 @@ def run_model():
 
 run_model()
 
+def update_counter():
+    counter_db.update_one({'name': 'counter'}, {'$inc': {'counter': 1}})
+
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
                    allow_methods=["*"], allow_headers=["*"])
 
 @app.get("api/v1/print")
-def print():
+def prints():
     return {
         "data": "Hello World"
     }
@@ -73,5 +78,24 @@ def genderpredictor(name):
     
 @app.post("/api/v1/insert")
 def insertData(person:Person):
-    return person
+    try:
+        print(person)
+        print("Inserting data")
+        inserted_person = gender_data.insert_one(dict(person)).inserted_id
+        counter = counter_db.find_one()
+        print(counter['counter'])
+        if(counter['counter'] >= 5):
+            run_model()
+            counter_db.update_one({'name': 'counter'}, {'$set':{'counter':0}})
+        else:
+            update_counter()
+        return {
+            "insertedPerson": person,
+            "success": True
+        }
+    except Exception as e:
+        print(e)
+        return {
+            "Error Happened"
+        }
 
