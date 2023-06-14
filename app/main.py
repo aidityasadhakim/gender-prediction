@@ -7,18 +7,17 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from pymongo import MongoClient
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 
 client = MongoClient(os.getenv('MONGO_SRC'))
 gender_data = client.gender_prediction.gender_data
-data = gender_data.find_one()
-print(data)
-PATH = 'https://raw.githubusercontent.com/Jcharis/Python-Machine-Learning/master/Gender%20Classification%20With%20%20Machine%20Learning/names_dataset.csv'
-df = pd.read_csv(PATH)
 
-df_names = df
+df_names = pd.DataFrame(list(gender_data.find({},{"_id":0})))
 
 df_names.sex.replace({'F':0,'M':1}, inplace=True)
 
