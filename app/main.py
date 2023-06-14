@@ -38,10 +38,16 @@ app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
                    allow_methods=["*"], allow_headers=["*"])
 
+@app.get("api/v1/print")
+def print():
+    return {
+        "data": "Hello World"
+    }
+
 @app.get("/api/v1/predict")
 # A function to do it
-def genderpredictor(a):
-    test_name = [a]
+def genderpredictor(name):
+    test_name = [name]
     vector = cv.transform(test_name).toarray()
     if clf.predict(vector) == 0:
         return {
